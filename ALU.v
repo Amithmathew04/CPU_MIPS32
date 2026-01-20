@@ -11,17 +11,14 @@ module Arithmetic_Unit(
     wire [31:0] B_mux;
     wire [7:0] P_group, G_group;
     wire [7:0] block_carries;
-    wire G_out_unused, P_out_unused;
 
     assign B_mux = binvert ? ~OpB : OpB;
 
     Global_LCU_8way lcu (
-        .cin(binvert), 
+        .cin(binvert),     //because -B = ~B + 1
         .P(P_group),
         .G(G_group),
         .C(block_carries),
-        .G_out(G_out_unused),
-        .P_out(P_out_unused)
     );
 
     genvar i;
@@ -72,7 +69,7 @@ module CLA_4bit(
     wire [4:0] c;         
     assign c[0] = cin;
     assign c[1] = g[0] | (p[0] & c[0]);
-    assign c[2] = g[1] | (p[1] & g[0]) | (p[0] & p[1] & c[0])
+    assign c[2] = g[1] | (p[1] & g[0]) | (p[0] & p[1] & c[0]);
     assign c[3] = g[2] | (p[2] & g[1]) | (p[2] & p[1] & g[0]) | (p[2] & p[1] & p[0] & c[0]);
     
     assign sum = p ^ c[3:0];
@@ -85,9 +82,7 @@ module Global_LCU_8way(
     input  wire cin,
     input  wire [7:0] P, 
     input  wire [7:0] G, 
-    output reg  [7:0] C, 
-    output wire G_out,   
-    output wire P_out    
+    output reg  [7:0] C     
 );
     integer i;
 
@@ -97,13 +92,6 @@ module Global_LCU_8way(
             C[i+1] = G[i] | (P[i] & C[i]);
         end
     end
-
-    assign P_out = &P;
-
-    assign G_out = G[7] | (P[7] & G[6]) | (P[7] & P[6] & G[5]) | (P[7] & P[6] & P[5] & G[4]) |
-                   (P[7] & P[6] & P[5] & P[4] & G[3]) | (P[7] & P[6] & P[5] & P[4] & P[3] & G[2]) |
-                   (P[7] & P[6] & P[5] & P[4] & P[3] & P[2] & G[1]) | 
-                   (P[7] & P[6] & P[5] & P[4] & P[3] & P[2] & P[1] & G[0]);
 endmodule
 
 module Shifter_Unit(
