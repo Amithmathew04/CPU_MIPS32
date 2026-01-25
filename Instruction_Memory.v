@@ -1,22 +1,5 @@
 `timescale 1ns/1ps
 
-module PC (  
-    input wire clk,
-    input wire reset,
-    output reg [31:0] pc_out
-);
-    localparam PC_RESET = 32'h0000_0000;
-    localparam PC_INCREMENT = 32'd4;
-
-    always(@posedge clk) begin
-        if (reset)
-            pc_out <= PC_RESET;
-        else
-            pc_out <= pc_out + PC_INCREMENT;
-    end
-
-endmodule
-
 module Instruction_Memory( 
         input wire [31:0] PC,
         output wire [31:0] instr       
@@ -34,10 +17,13 @@ module Instruction_Memory(
 endmodule
 
 
-module Data_Memory(
+module Data_Memory (
     input wire clk,
+    input wire MemWrite,
+    input wire MemRead,
     input wire [31:0] addr,
-    output wire [31:0] data
+    input wire [31:0] in_data,
+    output wire [31:0] out_data
 );
     localparam MEM_BYTES = 1024 * 128;
     localparam WORDS = MEM_BYTES/4;
@@ -61,4 +47,21 @@ module Register_File(
     output wire [31:0] rd1,
     output wire [31:0] rd2
 );
+    reg [31:0] regs [31:0];
+
+        assign rd1 = (ra1 != 0) ? regs[ra1] : 32'b0;
+    assign rd2 = (ra2 != 0) ? regs[ra2] : 32'b0;
+
+    always @(posedge clk) begin
+        if (we && wa != 0)
+            regs[wa] <= wd;
+    end
 endmodule
+
+module PipelineRegs(
+    input reg [31:0] a,
+    output reg [31:0] b
+);
+    always @(posedge clk)
+endmodule
+
