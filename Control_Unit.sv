@@ -1,7 +1,7 @@
-1ns/1ps
+`timescale 1ns/1ps
+
 module Control_Unit (
     input  wire [5:0] opcode,
-    output reg PCSrc,
     output reg RegDst,
     output reg Branch,
     output reg MemRead,
@@ -13,6 +13,7 @@ module Control_Unit (
 );
 
     always @(*) begin
+        // defaults = NOP
         RegDst   = 0;
         Branch   = 0;
         MemRead = 0;
@@ -25,25 +26,23 @@ module Control_Unit (
         case (opcode)
 
             6'b000000: begin // R-type
-                RegDst = 1;
+                RegDst   = 1;
                 RegWrite = 1;
-                ALUSrc = 0;
-                ALUOp = 2'b10;
-                PCSrc = 
+                ALUOp    = 2'b10;
             end
 
             6'b100011: begin // LW
-                ALUSrc = 1;
-                MemRead = 1;
+                ALUSrc   = 1;
+                MemRead  = 1;
                 MemtoReg = 1;
                 RegWrite = 1;
-                ALUOp = 2'b00;
+                ALUOp    = 2'b00;
             end
 
             6'b101011: begin // SW
-                ALUSrc = 1;
+                ALUSrc   = 1;
                 MemWrite = 1;
-                ALUOp = 2'b00;
+                ALUOp    = 2'b00;
             end
 
             6'b000100: begin // BEQ
@@ -55,6 +54,7 @@ module Control_Unit (
         endcase
     end
 endmodule
+
 
 module ALU_Control (
     input  wire [1:0] ALUOp,
